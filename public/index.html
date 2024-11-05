@@ -1,0 +1,142 @@
+<!-- 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Booking System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Seat Booking System</h1>
+        <div id="seat-map"></div>
+        <button id="book-btn" disabled onclick="openBookingForm()">Book Selected Seats</button>
+    </div>
+
+    <div id="overlay" class="overlay">
+        <div class="booking-form" id="booking-form">
+            <h2>Booking Form</h2>
+            <label for="teacher-name">Teacher's Name:</label>
+            <input type="text" id="teacher-name" placeholder="Enter Teacher's Name">
+            <div id="student-names-container"></div>
+            <button onclick="confirmBooking()">Confirm Booking</button>
+            <button onclick="closeBookingForm()">Cancel</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> -->
+
+
+
+
+<!-- new -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seat Booking System</title>
+  <!-- <link rel="stylesheet" href="styles.css"> -->
+   <style>
+    body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 0;
+}
+
+h1 {
+  margin-top: 20px;
+}
+
+#seat-container {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.seat {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.available {
+  background-color: #4CAF50;
+}
+
+.unavailable {
+  background-color: #f44336;
+  cursor: not-allowed;
+}
+
+.selected {
+  background-color: #FFEB3B;
+}
+
+   </style>
+</head>
+<body>
+  <h1>Seat Booking System</h1>
+  <div id="seat-container"></div>
+  <!-- <script src="script.js"></script> -->
+   <script>
+    // public/script.js
+document.addEventListener('DOMContentLoaded', () => {
+  const seatContainer = document.getElementById('seat-container');
+
+  // Fetch seat data from server
+  fetch('/api/seats')
+    .then(response => response.json())
+    .then(seats => {
+      seats.forEach(seat => {
+        const seatDiv = document.createElement('div');
+        seatDiv.className = `seat ${seat.status}`;
+        seatDiv.textContent = `${seat.rownumber}-${seat.seat_number}`;
+        seatDiv.dataset.id = seat.id;
+
+        if (seat.status === 'available') {
+          seatDiv.addEventListener('click', () => toggleSeatStatus(seatDiv));
+        }
+
+        seatContainer.appendChild(seatDiv);
+      });
+    })
+    .catch(error => console.error('Error fetching seats:', error));
+
+  // Toggle seat selection and update status
+  function toggleSeatStatus(seatDiv) {
+    const seatId = seatDiv.dataset.id;
+    const newStatus = seatDiv.classList.contains('selected') ? 'available' : 'selected';
+
+    fetch(`/api/seats/${seatId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          seatDiv.classList.toggle('selected');
+          seatDiv.classList.toggle('available');
+        }
+      })
+      .catch(error => console.error('Error updating seat:', error));
+  }
+});
+
+   </script>
+</body>
+</html>
